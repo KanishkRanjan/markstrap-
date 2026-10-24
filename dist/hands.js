@@ -148,7 +148,7 @@
         scale = Math.min(width / 820, height / 850);
         humanX = width - HUMAN.w * scale + 145 * scale;
         humanY = -16 * scale;
-        robotX = -165 * scale; robotY = height - ROBOT.h * scale + 95 * scale;
+        robotX = -165 * scale; robotY = height * .54;
       }
       human = makeAscii('human', scale, dpr);
       robot = makeAscii('robot', scale, dpr);
@@ -245,3 +245,4 @@
     };
   };
 })();
+
