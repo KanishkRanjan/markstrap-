@@ -111,3 +111,154 @@
 .dragon-art{width:46vw;max-width:46vw;opacity:.34}
 .dragon-right{right:-20vw;top:50%;transform:translateY(-50%) rotate(12deg)}
 .dragon-left{left:-21vw;top:50%;bottom:auto;transform:translateY(-50%) scaleX(-1) rotate(12deg);width:42vw;max-width:42vw;opacity:.28}
+/* Slide 5: halftone terrain hugs the right border, fading toward the content. */
+.visual-scene{overflow:hidden}
+.terrain-art{right:0;top:0;transform:none;height:100%;width:auto;max-width:34vw;opacity:.3;-webkit-mask-image:linear-gradient(270deg,#000 45%,transparent 100%);mask-image:linear-gradient(270deg,#000 45%,transparent 100%)}
+@media(max-width:800px){.terrain-art{opacity:.14}}
+/* Slide 6: ASCII jellyfish drifts along the left border. */
+.cost-scene{overflow:hidden}
+.jelly-art{left:-4vw;top:50%;transform:translateY(-50%);height:96%;width:auto;max-width:36vw;opacity:.3;-webkit-mask-image:linear-gradient(90deg,#000 35%,transparent 100%);mask-image:linear-gradient(90deg,#000 35%,transparent 100%)}
+@media(max-width:800px){.jelly-art{opacity:.12}}
+/* Slide 7: scanline ASCII texture frames both borders, fading toward the content. */
+.solution-scene{overflow:hidden}
+.scan-art{top:0;height:100%;width:auto;max-width:26vw;transform:none;opacity:.12}
+.scan-right{right:0;-webkit-mask-image:linear-gradient(270deg,#000 30%,transparent 100%);mask-image:linear-gradient(270deg,#000 30%,transparent 100%)}
+.scan-left{left:0;transform:scaleX(-1);-webkit-mask-image:linear-gradient(270deg,#000 30%,transparent 100%);mask-image:linear-gradient(270deg,#000 30%,transparent 100%)}
+@media(max-width:800px){.scan-art{opacity:.1}.scan-left{display:none}}
+/* Slide 2 flowers: original layout, inked at the same strength as the other artwork. */
+.bottleneck-scene .border-art-right{opacity:.85}
+.bottleneck-scene .border-art-left{opacity:.7}
+.bottleneck-scene .border-art{filter:drop-shadow(0 0 28px #5aa8ee3a)}
+/* Slide 7: scanline texture at the same strength as the other artwork, fully inked in the theme blue. */
+@media(min-width:801px){
+.scan-art{max-width:32vw;opacity:.7;filter:drop-shadow(0 0 22px #5aa8ee40)}
+.scan-right,.scan-left{-webkit-mask-image:linear-gradient(270deg,#000 25%,transparent 100%);mask-image:linear-gradient(270deg,#000 25%,transparent 100%)}
+}
+/* Slide 7: a large ASCII "m" is the focal piece. */
+.mark-wrapper{width:100%;max-width:620px;justify-self:center;display:flex;flex-direction:column;gap:22px;align-items:stretch}
+.mark-field{aspect-ratio:1.05;width:100%;position:relative;border-radius:2px;
+  background:radial-gradient(ellipse at 50% 55%,#173c6226,transparent 68%)}
+.mark-field>canvas{position:absolute;inset:0;width:100%;height:100%}
+.mark-flow{display:flex;align-items:center;gap:14px;font-size:12px;letter-spacing:.14em;color:#a8d4f7}
+.mark-flow>span{white-space:nowrap}
+.mark-flow>i{flex:1;height:1px;background:linear-gradient(90deg,#91d0ff55,#91d0ff22)}
+@media(max-width:800px){.mark-flow{font-size:9px;gap:8px}}
+@media(min-width:801px){
+.scan-art{max-width:20vw;opacity:.32;filter:none}
+.scan-right,.scan-left{-webkit-mask-image:linear-gradient(270deg,#000 0%,transparent 100%);mask-image:linear-gradient(270deg,#000 0%,transparent 100%)}
+}
+/* Slide 7: three-step flow. */
+.flow-wrapper{width:100%;max-width:600px;justify-self:center}
+.flow-cards{position:relative;display:flex;flex-direction:column;gap:18px;padding-left:34px}
+.flow-cards:before{content:'';position:absolute;left:11px;top:34px;bottom:34px;width:1px;background:linear-gradient(#91d0ff,#91d0ff55 60%,#91d0ff11)}
+.flow-card{position:relative;display:flex;gap:22px;align-items:flex-start;padding:22px 26px;border:1px solid #2a4560;border-radius:10px;background:linear-gradient(135deg,#0f2133dd,#0a1520dd);backdrop-filter:blur(6px)}
+.flow-card:before{content:'';position:absolute;left:-29px;top:34px;width:11px;height:11px;border-radius:50%;background:#91d0ff;box-shadow:0 0 0 5px #91d0ff22,0 0 18px #91d0ff88}
+.flow-card:nth-child(1){border-color:#4a7fae}
+.flow-num{font-size:14px;color:#91d0ff;letter-spacing:.1em;padding-top:8px}
+.flow-card h3{font-size:27px;font-weight:500;letter-spacing:-.035em;line-height:1.25;color:#f1f6fa;margin:0 0 8px}
+.flow-card p{font-size:16px;line-height:1.65;color:#9fb4c7;margin:0}
+.flow-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.flow-tags>span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border:1px solid #2f4d69;border-radius:20px;color:#8fc4ee;background:#0c1b2a}
+.solution-layout{align-items:center}
+@media(min-width:801px){.scan-art{max-width:15vw;opacity:.2}}
+@media(max-width:800px){.flow-card h3{font-size:21px}.flow-card{padding:16px 18px}}
+/* Fit fixes verified in screenshots at 1600x900. */
+@media(min-width:801px){
+.demo-scene .scene-inner,.features-scene .scene-inner{padding-top:96px;padding-bottom:72px}
+.demo-scene .scene-title,.features-scene .scene-title{font-size:clamp(34px,3.3vw,52px)}
+.demo-scene .scene-heading,.features-scene .scene-heading{margin-bottom:18px}
+.demo-scene .concept-line,.features-scene .concept-line{padding:12px 0}
+.demo-scene .concept-line p,.features-scene .concept-line p{font-size:20px!important}
+.demo-scene .concept-line small,.features-scene .concept-line small{font-size:14px!important;margin-top:4px}
+.demo-scene .scene-disclaimer,.features-scene .scene-disclaimer{margin-top:14px}
+.demo-scene .brief-row{padding:13px 0}
+.demo-scene .brief-insight{margin-top:14px;font-size:21px!important}
+.puppet-art{inset:41% 0 9%}
+.bottleneck-scene .border-art-right{opacity:.55}
+.bottleneck-scene .border-art-left{opacity:.4}
+}
+/* Slide 7: fan-and-arc diagram. */
+.solution-scene .sol-diagram{display:block;width:100%;height:auto;max-height:56vh;margin-top:6px;overflow:visible}
+.sol-diagram text{font-family:'Manrope',Arial,sans-serif}
+.sol-chip-text{font:500 13px 'IBM Plex Mono',monospace!important;letter-spacing:.14em;fill:#bcd6ff}
+.sol-hub-title{font-size:36px;font-weight:700;letter-spacing:-.03em;fill:#fff}
+.sol-hub-sub{font-size:17px;fill:#c8dcff}
+.sol-pill{font-size:15px;font-weight:600;fill:#0d2038}
+.sol-node-title{font-size:21px;font-weight:600;fill:#eaf3fb;letter-spacing:-.01em}
+.sol-node-desc{font-size:15px;fill:#8ea9c2}
+.sol-final{font-size:20px;font-weight:700;fill:#fff}
+.solution-scene .scene-inner{padding-top:96px;padding-bottom:64px;justify-content:flex-start}
+.solution-scene .scene-title{font-size:clamp(34px,3.3vw,52px)}
+.solution-scene .scene-heading{margin-bottom:6px}
+.solution-scene .product-status{margin-top:6px}
+.solution-scene .sol-diagram{width:calc(100% + 7vw);margin-right:-7vw;max-height:60vh}
+.sol-hub-title{font-size:40px}
+.sol-final{font-size:15px}
+.solution-scene .scene-heading{display:block}
+.solution-scene .heading-aside{max-width:560px;margin:12px 0 0;font-size:17px!important}
+.solution-scene .sol-diagram{max-height:54vh}
+.sol-hub-title{font-size:38px}.sol-hub-sub{font-size:16px}
+.solution-scene .sol-diagram{margin-top:-96px;max-height:58vh}
+.solution-scene .product-status{display:none}
+.solution-scene .heading-aside{position:relative;z-index:2}
+.sol-hub-title{font-size:35px}.sol-hub-sub{font-size:15px}
+@media(max-height:820px){.solution-scene .heading-aside{display:none}.solution-scene .sol-diagram{margin-top:-60px}}
+.sol-chip-text{fill:#d6ecff}.sol-hub-sub{fill:#d6ecff}
+.sol-final{fill:#08121c}
+/* Slide 7: rose on the left border. */
+.solution-scene{overflow:hidden}
+.rose-left{left:-1vw;right:auto;top:50%;height:auto;width:15vw;max-width:15vw;opacity:.5;transform:translateY(-44%) scaleX(-1);z-index:-1;-webkit-mask-image:linear-gradient(270deg,#000 40%,transparent 100%);mask-image:linear-gradient(270deg,#000 40%,transparent 100%);filter:drop-shadow(0 0 24px #5aa8ee40)}
+@media(max-width:800px){.rose-left{display:none}}
+.rose-left{left:-1vw;top:auto;bottom:40px;width:23vw;max-width:23vw;height:auto;opacity:.62;transform:scaleX(-1);-webkit-mask-image:linear-gradient(270deg,#000 62%,transparent 100%);mask-image:linear-gradient(270deg,#000 62%,transparent 100%)}
+/* Slide 7: the scanline rose, shown as a picture so its shape reads. */
+.rose-left{left:0;top:0;bottom:auto;height:calc(100% - 62px);width:auto;max-width:30vw;opacity:.95;transform:none;
+  -webkit-mask-image:linear-gradient(270deg,transparent 0,#000 55%,#000 100%);mask-image:linear-gradient(270deg,transparent 0,#000 55%,#000 100%);filter:none}
+@media(max-width:800px){.rose-left{display:none}}
+.rose-left{top:auto;bottom:62px;left:0;height:54%;max-width:26vw;opacity:.85;
+  -webkit-mask-image:linear-gradient(0deg,#000 55%,transparent 100%),linear-gradient(270deg,transparent 0,#000 60%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(0deg,#000 55%,transparent 100%),linear-gradient(270deg,transparent 0,#000 60%);mask-composite:intersect}
+.rose-left{top:0;bottom:auto;left:0;height:calc(100% - 62px);max-width:34vw;opacity:.5;
+  -webkit-mask-image:linear-gradient(270deg,transparent 0,#000 70%);-webkit-mask-composite:source-over;
+  mask-image:linear-gradient(270deg,transparent 0,#000 70%);mask-composite:add}
+.rose-left{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 55%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 55%,transparent 100%)}
+.sol-pill{font-family:'IBM Plex Mono',ui-monospace,monospace!important;font-size:13px;font-weight:500;letter-spacing:.02em}
+.sol-final{font-family:'IBM Plex Mono',ui-monospace,monospace!important;font-size:13px}
+.sol-node-title{letter-spacing:-.005em}
+/* Slide 8: ASCII wave on the right border. */
+.demo-scene{overflow:hidden}
+.wave-art{right:-6vw;left:auto;top:0;height:100%;width:auto;max-width:46vw;transform:none;opacity:.75;
+  -webkit-mask-image:linear-gradient(270deg,#000 40%,transparent 100%);mask-image:linear-gradient(270deg,#000 40%,transparent 100%);filter:drop-shadow(0 0 18px #5aa8ee33)}
+@media(max-width:800px){.wave-art{opacity:.3}}
+.wave-art{right:-3vw;top:-2%;height:104%;max-width:52vw;opacity:.95}
+/* Slide 8: glowing pixel figure on the right border. Slide 9: the ASCII wave. */
+.glow-art{right:-2vw;left:auto;top:0;height:100%;width:auto;max-width:42vw;transform:none;opacity:.85;
+  -webkit-mask-image:linear-gradient(270deg,#000 45%,transparent 100%);mask-image:linear-gradient(270deg,#000 45%,transparent 100%);filter:drop-shadow(0 0 24px #5aa8ee44)}
+.features-scene{overflow:hidden}
+.wave-9{opacity:.55}
+@media(max-width:800px){.glow-art{opacity:.3}.wave-9{opacity:.25}}
+/* Slide 10: pixel swan on the right, behind the table. */
+.comparison-scene{overflow:hidden}
+.swan-art{right:-2vw;left:auto;top:auto;bottom:70px;height:auto;width:42vw;max-width:42vw;transform:none;opacity:.5;
+  -webkit-mask-image:linear-gradient(270deg,#000 45%,transparent 100%);mask-image:linear-gradient(270deg,#000 45%,transparent 100%);filter:drop-shadow(0 0 22px #5aa8ee44)}
+@media(max-width:800px){.swan-art{opacity:.2;width:80vw;max-width:80vw}}
+.swan-art{opacity:.4;bottom:56px;right:-4vw}
+/* Slide 11: black hole, slowly breathing and drifting. */
+.blackhole{position:absolute;right:-6vw;bottom:-4%;width:68vw;max-width:1100px;z-index:0;pointer-events:none;
+  -webkit-mask-image:radial-gradient(ellipse at 38% 45%,#000 38%,transparent 78%);mask-image:radial-gradient(ellipse at 38% 45%,#000 38%,transparent 78%)}
+.blackhole>img{display:block;width:100%;height:auto;transform:scaleX(-1);mix-blend-mode:screen;opacity:.85;animation:bh-drift 22s ease-in-out infinite alternate,bh-pulse 6s ease-in-out infinite alternate}
+@keyframes bh-drift{from{transform:scaleX(-1) scale(1) translate(0,0) rotate(0deg)}to{transform:scaleX(-1) scale(1.09) translate(-1.6%,-1.4%) rotate(-1.6deg)}}
+@keyframes bh-pulse{from{filter:brightness(.85) saturate(1)}to{filter:brightness(1.18) saturate(1.15)}}
+.ambient-paused .blackhole>img{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.blackhole>img{animation:none}}
+@media(max-width:800px){.blackhole{width:120vw;right:-35vw;opacity:.5}}
+.blackhole{right:-3vw;bottom:auto;top:52%;transform:translateY(-50%);width:62vw;
+  -webkit-mask-image:radial-gradient(ellipse at 60% 46%,#000 22%,transparent 66%);mask-image:radial-gradient(ellipse at 60% 46%,#000 22%,transparent 66%)}
+.blackhole{aspect-ratio:1454/826;-webkit-mask-image:radial-gradient(ellipse at 60% 46%,#000 30%,transparent 72%);mask-image:radial-gradient(ellipse at 60% 46%,#000 30%,transparent 72%)}
+.blackhole>canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 26px #3a8fe055)}
+.blackhole{right:1vw;width:58vw;top:50%}
+/* Cleaner slides: drop the small tagline and disclaimer lines; hide the header and footer bars in fullscreen. */
+.header-caption,.footer-signature,.scene-disclaimer,.closing-thought,.product-status{display:none!important}
+:fullscreen .presentation-header,:fullscreen .presentation-footer,:fullscreen .overall-progress{display:none!important}
+:fullscreen .scene-inner{padding-top:56px;padding-bottom:56px}
+.chapter-rail{display:none!important}
+.question-art{opacity:.5!important;animation:none!important;filter:none!important}
