@@ -82,8 +82,8 @@ function App(){
       <Scene index={0} current={current} className="hero-scene puppet-hero">
         <div className="hero-frame" aria-hidden="true"><span/><span/><i/><i/></div>
         <Suspense fallback={<div className="puppet-art puppet-loading" aria-hidden="true"><span/></div>}><HandPuppet active={current===0} paused={paused||reduced}/></Suspense>
-        <div className="mechanism-label agent-caption mono"><span>AGENT EXECUTION</span><i/><small>THE WORK, AMPLIFIED.</small></div>
-        <div className="mechanism-label human-caption mono"><span>HUMAN DIRECTION</span><i/><small>A SMALL GESTURE.</small></div>
+        <div className="mechanism-label agent-caption mono"><span>AGENT RELEASE</span><i/><small>WORK MOVES DOWNSTREAM.</small></div>
+        <div className="mechanism-label human-caption mono"><span>HUMAN PLATFORM</span><i/><small>GUIDANCE STAYS PRESENT.</small></div>
         <div className="hero-copy"><Kicker number={1}>MARKSTRAP / THE PROBLEM</Kicker><Heading hero line="How many good ideas" second="never get a fair test?" italic reduced={reduced}/><Reveal delay={0.2}><p className="hero-subtitle">The insight is there. The ambition is there.<br/>{' '}Every new campaign experiment still has a production cost.</p></Reveal></div>
         <div className="hero-persona"><span className="mono label">BUILT FOR MARKETING TEAMS</span><p>From small organizations<br/>to established marketing pipelines.</p></div>
       </Scene>

@@ -201,25 +201,30 @@ function setupRig(gltf, mechanical) {
     const pp=discPosition.clone();pp.x+=.003;attachWorld(pin,wrist,pp,new THREE.Quaternion().setFromUnitVectors(V(0,1,0),V(1,0,0)));
   }
 
-  function pose(t,reduced){
+  function pose(t,reduced,release=1){
     for(const {bone,original,axis} of motion){
       let angle=0;
       const name=bone.name;
       const fi=fingers.findIndex(f=>name.startsWith(f));
       if(fi<0) continue;
-      if(name.includes('phalanx-proximal')) angle=fi===0?.10:.12+fi*.045;
-      if(name.includes('intermediate')) angle=.25+fi*.08;
-      if(name.includes('distal')) angle=.13+fi*.04;
-      if(name.includes('metacarpal')) angle=fi===0?-.10:0;
       if(mechanical){
-        // Multiple servo corrections answer one almost imperceptible gesture.
-        if(!reduced && !name.includes('tip')){
-          const envelope=.5+.5*Math.sin(t*.55-fi*.32);
-          const servo=Math.sin(t*2.1+fi*.7)*.024+Math.sin(t*3.8+fi)*.015;
-          angle+=servo*(name.includes('metacarpal')?.3:1)+smoothstep(envelope)*.06;
-        }
-      }else if(!reduced && name.includes('proximal')){
-        angle+=Math.sin(t*.55+fi*.08)*.008;
+        // A loose, anatomical release: the fingers begin softly gathered and
+        // relax open as the sphere leaves the hand. No servo chatter or clawing.
+        if(name.includes('phalanx-proximal')) angle=fi===0?.14:.10+fi*.025;
+        if(name.includes('intermediate')) angle=.16+fi*.035;
+        if(name.includes('distal')) angle=.10+fi*.025;
+        if(name.includes('metacarpal')) angle=fi===0?-.12:0;
+        const held=(1-release)*(fi===0?.10:.16);
+        if(name.includes('proximal')) angle+=held;
+        if(name.includes('intermediate')) angle+=held*.72;
+        if(!reduced && release>.92 && name.includes('proximal')) angle+=Math.sin(t*.32+fi*.45)*.004;
+      }else{
+        // The lower hand is a relaxed platform rather than a reaching catch.
+        if(name.includes('phalanx-proximal')) angle=fi===0?.18:[.24,.20,.24,.32][fi-1];
+        if(name.includes('intermediate')) angle=[.18,.15,.19,.27][fi-1]||0;
+        if(name.includes('distal')) angle=fi===0?.12:[.10,.09,.12,.17][fi-1];
+        if(name.includes('metacarpal')) angle=fi===0?-.05:0;
+        if(!reduced && name.includes('proximal')) angle+=Math.sin(t*.32+fi*.18)*.003;
       }
       bone.quaternion.copy(original).multiply(new THREE.Quaternion().setFromAxisAngle(axis,angle));
     }
@@ -234,8 +239,7 @@ function fallbackMarkup(){
     <linearGradient id="puppet-limb" x2="1" y2="1"><stop stopColor="#4b5358"/><stop offset=".6" stopColor="#c8cbc6"/><stop offset="1" stopColor="#ede9dd"/></linearGradient></defs>
     <path d="M0 441L246 326Q330 288 392 301L518 278Q541 276 546 287Q549 300 528 308L433 334L488 329Q511 332 505 348L442 376Q386 407 309 404L0 488Z" fill="url(#puppet-limb)"/>
     <path d="M1200 44L922 127Q846 148 806 178L713 205Q694 211 698 224Q702 237 723 231L810 209L752 249Q737 260 747 272Q758 282 778 269L844 237L815 275Q806 289 820 297Q835 303 848 288L895 241Q929 214 950 185L1200 106Z" fill="url(#puppet-limb)"/>
-    <g stroke="#b3c2cb" strokeWidth=".6" opacity=".35"><path d="M527 294L713 219"/><path d="M491 344L755 265"/><path d="M442 376L826 286"/></g>
-    <circle cx="610" cy="250" r="68" fill="url(#puppet-orb)"/>
+    <circle cx="610" cy="275" r="68" fill="url(#puppet-orb)"/>
   </svg>;
 }
 
@@ -271,13 +275,6 @@ export default function HandPuppet({active=true,paused=false}) {
     const orbMaterial=new THREE.MeshPhysicalMaterial({color:'#e6e3d8',roughness:.54,metalness:.04,clearcoat:.12,clearcoatRoughness:.5,emissive:'#b5bbbd',emissiveIntensity:.045});
     const orb=new THREE.Mesh(new THREE.SphereGeometry(.60,64,48),orbMaterial);orb.position.set(0,0,.28);scene.add(orb);
     const bounce=new THREE.PointLight('#ebeff3',1.1,6,2);bounce.position.set(0,0,1.2);scene.add(bounce);
-    // The only graphic overlay is three hairline tendons, positioned in 3D.
-    const threads=[];
-    for(let i=0;i<3;i++){
-      const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(30*3),3));
-      const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:'#b7c6cf',transparent:true,opacity:.31,depthWrite:false}));
-      line.frustumCulled=false;scene.add(line);threads.push(line);
-    }
     function resize(){
       dirty=true;
       const {width,height}=node.getBoundingClientRect();if(!width||!height)return;
@@ -287,8 +284,8 @@ export default function HandPuppet({active=true,paused=false}) {
       camera.updateProjectionMatrix();
       if(human&&robot){
         const compact=width<620;
-        human.mount.position.set(compact?-2.25:-2.9,compact?-1.02:-1.0,.0);
-        robot.mount.position.set(compact?2.35:3.02,compact?1.03:1.08,-.08);
+        human.mount.position.set(compact?-2.22:-2.82,compact?-1.34:-1.30,.04);
+        robot.mount.position.set(compact?2.30:2.96,compact?1.22:1.24,-.08);
       }
       renderer.render(scene,camera);
     }
@@ -297,15 +294,14 @@ export default function HandPuppet({active=true,paused=false}) {
     Promise.all([loader.loadAsync('/models/right-hand.glb'),loader.loadAsync('/models/right-hand.glb')]).then(([h,r])=>{
       if(disposed){disposeTree(h.scene);disposeTree(r.scene);return;}
       human=setupRig(h,false);robot=setupRig(r,true);
-      human.mount.rotation.set(-.92,.08,.18);
-      robot.mount.rotation.set(-.60,-.12,Math.PI+.18);
+      human.mount.rotation.set(.72,.04,.13);
+      robot.mount.rotation.set(-.48,-.10,Math.PI+.14);
       scene.add(human.mount,robot.mount);
       human.pose(0,true);robot.pose(0,true);
       scene.updateMatrixWorld(true);
       loaded=true;dirty=true;resize();
     }).catch(()=>{if(!disposed){renderer.domElement.style.visibility='hidden';setFallback(true);}});
 
-    const handPoint=V(),robotPoint=V();
     function render(now){
       if(disposed)return;
       frame=requestAnimationFrame(render);
@@ -318,25 +314,13 @@ export default function HandPuppet({active=true,paused=false}) {
       dirty=false;
       if(loaded){
         const reduced=media.matches;
-        human.pose(clock,reduced);robot.pose(clock,reduced);
-        human.mount.rotation.z=.18+(reduced?0:Math.sin(clock*.55)*.006);
-        robot.mount.rotation.z=Math.PI+.18+(reduced?0:Math.sin(clock*.55-.18)*.025+Math.sin(clock*2.1)*.009);
-        robot.mount.rotation.y=-.12+(reduced?0:Math.sin(clock*1.1)*.035);
-        scene.updateMatrixWorld(true);
-        ['index-finger-tip','middle-finger-tip','ring-finger-tip'].forEach((name,i)=>{
-          human.bones[name].getWorldPosition(handPoint);
-          robot.bones[name].getWorldPosition(robotPoint);
-          const positions=threads[i].geometry.attributes.position;
-          for(let j=0;j<30;j++){
-            const u=j/29;
-            positions.setXYZ(j,
-              THREE.MathUtils.lerp(handPoint.x,robotPoint.x,u),
-              THREE.MathUtils.lerp(handPoint.y,robotPoint.y,u)-Math.sin(Math.PI*u)*.065,
-              THREE.MathUtils.lerp(handPoint.z,robotPoint.z,u)+.025);
-          }
-          positions.needsUpdate=true;
-        });
-        orb.position.y=media.matches?0:Math.sin(clock*.55)*.018;
+        const release=reduced?1:smoothstep(THREE.MathUtils.clamp((clock-.65)/2.55,0,1));
+        human.pose(clock,reduced,1);robot.pose(clock,reduced,release);
+        human.mount.rotation.z=.13+(reduced?0:Math.sin(clock*.32)*.003);
+        robot.mount.rotation.z=Math.PI+.14+(reduced?0:Math.sin(clock*.28-.2)*.006);
+        robot.mount.rotation.y=-.10+(reduced?0:Math.sin(clock*.25)*.008);
+        const settle=release===1&&!reduced?Math.sin((clock-3.2)*1.45)*.012*Math.exp(-(clock-3.2)*.24):0;
+        orb.position.y=THREE.MathUtils.lerp(.58,-.02,release)+settle;
       }
       renderer.render(scene,camera);
     }
@@ -349,5 +333,5 @@ export default function HandPuppet({active=true,paused=false}) {
       disposeTree(scene);env.dispose();renderer.dispose();renderer.domElement.remove();
     };
   },[]);
-  return <div ref={host} className="puppet-art" role="img" aria-label="A human hand subtly directs an articulated robotic hand around a softly lit sphere.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;
+  return <div ref={host} className="puppet-art" role="img" aria-label="A relaxed robotic hand releases a softly lit sphere, which hovers above an open human palm.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;
 }
