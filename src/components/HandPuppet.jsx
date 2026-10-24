@@ -7,7 +7,6 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 const V = (x=0,y=0,z=0) => new THREE.Vector3(x,y,z);
 const fingers = ['thumb', 'index-finger', 'middle-finger', 'ring-finger', 'pinky-finger'];
 const canonical = new THREE.Matrix4().makeBasis(V(0,0,1), V(-1,0,0), V(0,-1,0));
-const smoothstep = x => x*x*(3-2*x);
 
 function ceramic(color, roughness=.4, metalness=.08) {
   return new THREE.MeshStandardMaterial({color,roughness,metalness});
@@ -361,14 +360,15 @@ export default function HandPuppet({active=true,paused=false}) {
       dirty=false;
       if(loaded){
         const reduced=media.matches;
-        const release=reduced?1:smoothstep(THREE.MathUtils.clamp((clock-.65)/2.55,0,1));
+        const release=1;
         human.pose(clock,reduced,1);robot.pose(clock,reduced,release);
         human.mount.rotation.z=.13+(reduced?0:Math.sin(clock*.32)*.003);
         robot.mount.rotation.z=Math.PI+.14+(reduced?0:Math.sin(clock*.28-.2)*.006);
         robot.mount.rotation.y=-.10+(reduced?0:Math.sin(clock*.25)*.008);
-        const settle=release===1&&!reduced?Math.sin((clock-3.2)*1.35)*.014*Math.exp(-(clock-3.2)*.22):0;
-        figure.puppet.position.y=THREE.MathUtils.lerp(.62,.10,release)+settle;
-        figure.puppet.rotation.z=reduced?-.025:Math.sin(clock*.43)*.025*Math.max(.35,1-release*.45);
+        // The marionette is supported by the strings at a fixed height. A tiny
+        // pendulum arc gives it weight without reading as a fall or free float.
+        figure.puppet.position.y=.18;
+        figure.puppet.rotation.z=reduced?-.01:Math.sin(clock*.30)*.012;
         scene.updateMatrixWorld(true);
         ['index-finger-tip','middle-finger-tip','ring-finger-tip'].forEach((name,i)=>{
           robot.bones[name].getWorldPosition(handPoint);figure.anchors[i].getWorldPosition(anchorPoint);
@@ -377,8 +377,8 @@ export default function HandPuppet({active=true,paused=false}) {
             const u=j/23;
             positions.setXYZ(j,
               THREE.MathUtils.lerp(handPoint.x,anchorPoint.x,u),
-              THREE.MathUtils.lerp(handPoint.y,anchorPoint.y,u)-Math.sin(Math.PI*u)*.025,
-              THREE.MathUtils.lerp(handPoint.z,anchorPoint.z,u)+Math.sin(Math.PI*u)*.012);
+              THREE.MathUtils.lerp(handPoint.y,anchorPoint.y,u),
+              THREE.MathUtils.lerp(handPoint.z,anchorPoint.z,u));
           }
           positions.needsUpdate=true;
         });
@@ -394,5 +394,5 @@ export default function HandPuppet({active=true,paused=false}) {
       disposeTree(scene);env.dispose();renderer.dispose();renderer.domElement.remove();
     };
   },[]);
-  return <div ref={host} className="puppet-art" role="img" aria-label="A sculptural marionette hangs from fine strings beneath a relaxed robotic hand, above an open human palm.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;
+  return <div ref={host} className="puppet-art" role="img" aria-label="A sculptural marionette hangs from three taut strings beneath a relaxed robotic hand, safely above an open human palm.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;
 }
