@@ -280,15 +280,13 @@ function fallbackMarkup(){
   </svg>;
 }
 
-export default function HandPuppet({active=true,paused=false}) {
-  const host=useRef(null), state=useRef({active,paused});
+export default function HandPuppet() {
+  const host=useRef(null);
   const [fallback,setFallback]=useState(false);
-  state.current={active,paused};
   useEffect(()=>{
     const node=host.current;if(!node)return;
-    let renderer,disposed=false,frame=0,last=0,clock=0,previous=0,loaded=false,dirty=true;
+    let renderer,disposed=false,frame=0,last=0,loaded=false,dirty=true;
     let human,robot;
-    const media=window.matchMedia('(prefers-reduced-motion: reduce)');
     const scene=new THREE.Scene();
     const camera=new THREE.PerspectiveCamera(30,1,.1,100);camera.position.set(0,.25,12);
     camera.lookAt(0,0,0);
@@ -329,8 +327,8 @@ export default function HandPuppet({active=true,paused=false}) {
       camera.updateProjectionMatrix();
       if(human&&robot){
         const compact=width<620;
-        human.mount.position.set(compact?-2.22:-2.82,compact?-1.62:-1.45,.04);
-        robot.mount.position.set(compact?2.30:2.96,compact?1.22:1.24,-.08);
+        human.mount.position.set(compact?-2.22:-2.82,compact?-1.78:-1.62,.04);
+        robot.mount.position.set(compact?2.30:2.96,compact?1.50:1.54,-.08);
       }
       renderer.render(scene,camera);
     }
@@ -352,23 +350,19 @@ export default function HandPuppet({active=true,paused=false}) {
       if(disposed)return;
       frame=requestAnimationFrame(render);
       if(now-last<1000/30)return;
-      const enabled=state.current.active&&!state.current.paused&&!document.hidden;
-      const dt=previous?Math.min((now-previous)/1000,.08):0;previous=now;
-      if(enabled&&!media.matches)clock+=dt;
-      if((!enabled||media.matches)&&loaded&&!dirty)return;
+      if(loaded&&!dirty)return;
       last=now;
       dirty=false;
       if(loaded){
-        const reduced=media.matches;
         const release=1;
-        human.pose(clock,reduced,1);robot.pose(clock,reduced,release);
-        human.mount.rotation.z=.13+(reduced?0:Math.sin(clock*.32)*.003);
-        robot.mount.rotation.z=Math.PI+.14+(reduced?0:Math.sin(clock*.28-.2)*.006);
-        robot.mount.rotation.y=-.10+(reduced?0:Math.sin(clock*.25)*.008);
-        // The marionette is supported by the strings at a fixed height. A tiny
-        // pendulum arc gives it weight without reading as a fall or free float.
+        human.pose(0,true,1);robot.pose(0,true,release);
+        human.mount.rotation.z=.13;
+        robot.mount.rotation.z=Math.PI+.14;
+        robot.mount.rotation.y=-.10;
+        // Everything is motionless in equilibrium: the puppet's weight is
+        // carried by the taut strings and never transfers to the human hand.
         figure.puppet.position.y=.18;
-        figure.puppet.rotation.z=reduced?-.01:Math.sin(clock*.30)*.012;
+        figure.puppet.rotation.z=0;
         scene.updateMatrixWorld(true);
         ['index-finger-tip','middle-finger-tip','ring-finger-tip'].forEach((name,i)=>{
           robot.bones[name].getWorldPosition(handPoint);figure.anchors[i].getWorldPosition(anchorPoint);
