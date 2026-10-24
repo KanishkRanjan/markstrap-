@@ -22,6 +22,37 @@ function disposeTree(scene) {
   geometry.forEach(g=>g.dispose()); materials.forEach(m=>m.dispose());
 }
 
+function marionette(material,dark) {
+  const puppet=new THREE.Group();
+  const joint=(x,y,z=0,r=.055)=>{
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(r,20,14),dark);
+    mesh.position.set(x,y,z);puppet.add(mesh);return mesh;
+  };
+  const limb=(x,y,length,radius,rotation=0)=>{
+    const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius*.92,length,20),material);
+    mesh.position.set(x,y,0);mesh.rotation.z=rotation;puppet.add(mesh);return mesh;
+  };
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.22,36,24),material);head.position.y=.59;puppet.add(head);
+  const torso=new THREE.Mesh(new RoundedBoxGeometry(.43,.52,.19,5,.06),material);torso.position.y=.17;puppet.add(torso);
+  const pelvis=new THREE.Mesh(new RoundedBoxGeometry(.34,.15,.18,4,.05),dark);pelvis.position.y=-.19;puppet.add(pelvis);
+  limb(-.31,.18,.36,.06,-.52);limb(.31,.18,.36,.06,.52);
+  joint(-.40,.03);joint(.40,.03);
+  limb(-.48,-.10,.31,.052,-.30);limb(.48,-.10,.31,.052,.30);
+  joint(-.53,-.25,0,.065);joint(.53,-.25,0,.065);
+  limb(-.12,-.39,.38,.07,-.10);limb(.12,-.39,.38,.07,.10);
+  joint(-.14,-.58);joint(.14,-.58);
+  limb(-.16,-.76,.35,.058,.06);limb(.16,-.76,.35,.058,-.06);
+  const leftFoot=new THREE.Mesh(new RoundedBoxGeometry(.20,.08,.24,3,.03),dark);leftFoot.position.set(-.18,-.96,.05);puppet.add(leftFoot);
+  const rightFoot=leftFoot.clone();rightFoot.position.x=.18;puppet.add(rightFoot);
+  [-.075,.075].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(.018,14,10),dark);eye.position.set(x,.62,.205);puppet.add(eye);});
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(.022,.09,16),material);nose.rotation.x=Math.PI/2;nose.position.set(0,.56,.245);puppet.add(nose);
+  const anchors=[new THREE.Object3D(),new THREE.Object3D(),new THREE.Object3D()];
+  anchors[0].position.set(-.53,-.20,0);anchors[1].position.set(0,.81,0);anchors[2].position.set(.53,-.20,0);
+  anchors.forEach(anchor=>puppet.add(anchor));
+  puppet.scale.setScalar(.78);
+  return {puppet,anchors};
+}
+
 function continuousForearm(model,origin,material) {
   let source;
   model.traverse(o=>{if(o.isSkinnedMesh&&!source)source=o.geometry;});
@@ -241,7 +272,12 @@ function fallbackMarkup(){
     <linearGradient id="puppet-limb" x2="1" y2="1"><stop stopColor="#4b5358"/><stop offset=".6" stopColor="#c8cbc6"/><stop offset="1" stopColor="#ede9dd"/></linearGradient></defs>
     <path d="M0 441L246 326Q330 288 392 301L518 278Q541 276 546 287Q549 300 528 308L433 334L488 329Q511 332 505 348L442 376Q386 407 309 404L0 488Z" fill="url(#puppet-limb)"/>
     <path d="M1200 44L922 127Q846 148 806 178L713 205Q694 211 698 224Q702 237 723 231L810 209L752 249Q737 260 747 272Q758 282 778 269L844 237L815 275Q806 289 820 297Q835 303 848 288L895 241Q929 214 950 185L1200 106Z" fill="url(#puppet-limb)"/>
-    <circle cx="610" cy="275" r="68" fill="url(#puppet-orb)"/>
+    <g fill="none" stroke="#aebfca" strokeWidth="1" opacity=".55"><path d="M770 196L577 310"/><path d="M730 205L610 245"/><path d="M700 220L644 310"/></g>
+    <g transform="translate(610 320)" fill="url(#puppet-orb)" stroke="#68757c" strokeWidth="2">
+      <circle cy="-62" r="23"/><rect x="-23" y="-34" width="46" height="55" rx="10"/>
+      <path d="M-20-20L-48 8L-58 36M20-20L48 8L58 36M-12 22L-17 66L-20 105M12 22L17 66L20 105" strokeWidth="12" strokeLinecap="round"/>
+      <circle cx="-58" cy="36" r="6"/><circle cx="58" cy="36" r="6"/>
+    </g>
   </svg>;
 }
 
@@ -274,9 +310,17 @@ export default function HandPuppet({active=true,paused=false}) {
     const key=new THREE.DirectionalLight('#fff8e8',2.2);key.position.set(-3,5,6);scene.add(key);
     const rim=new THREE.DirectionalLight('#b4d4eb',3.1);rim.position.set(4,1,-3);scene.add(rim);
     const fill=new THREE.DirectionalLight('#b4c7db',.8);fill.position.set(-5,-2,3);scene.add(fill);
-    const orbMaterial=new THREE.MeshPhysicalMaterial({color:'#e6e3d8',roughness:.54,metalness:.04,clearcoat:.12,clearcoatRoughness:.5,emissive:'#b5bbbd',emissiveIntensity:.045});
-    const orb=new THREE.Mesh(new THREE.SphereGeometry(.60,64,48),orbMaterial);orb.position.set(0,0,.28);scene.add(orb);
+    const puppetMaterial=new THREE.MeshPhysicalMaterial({color:'#e6e3d8',roughness:.54,metalness:.04,clearcoat:.12,clearcoatRoughness:.5,emissive:'#b5bbbd',emissiveIntensity:.045});
+    const puppetDark=ceramic('#68757c',.42,.32);
+    const figure=marionette(puppetMaterial,puppetDark);scene.add(figure.puppet);
     const bounce=new THREE.PointLight('#ebeff3',1.1,6,2);bounce.position.set(0,0,1.2);scene.add(bounce);
+    const strings=[];
+    for(let i=0;i<3;i++){
+      const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(24*3),3));
+      const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:'#dbe3e6',transparent:true,opacity:.84,depthWrite:false,depthTest:false}));
+      line.renderOrder=3;
+      line.frustumCulled=false;scene.add(line);strings.push(line);
+    }
     function resize(){
       dirty=true;
       const {width,height}=node.getBoundingClientRect();if(!width||!height)return;
@@ -304,6 +348,7 @@ export default function HandPuppet({active=true,paused=false}) {
       loaded=true;dirty=true;resize();
     }).catch(()=>{if(!disposed){renderer.domElement.style.visibility='hidden';setFallback(true);}});
 
+    const handPoint=V(),anchorPoint=V();
     function render(now){
       if(disposed)return;
       frame=requestAnimationFrame(render);
@@ -321,8 +366,22 @@ export default function HandPuppet({active=true,paused=false}) {
         human.mount.rotation.z=.13+(reduced?0:Math.sin(clock*.32)*.003);
         robot.mount.rotation.z=Math.PI+.14+(reduced?0:Math.sin(clock*.28-.2)*.006);
         robot.mount.rotation.y=-.10+(reduced?0:Math.sin(clock*.25)*.008);
-        const settle=release===1&&!reduced?Math.sin((clock-3.2)*1.45)*.012*Math.exp(-(clock-3.2)*.24):0;
-        orb.position.y=THREE.MathUtils.lerp(.58,.08,release)+settle;
+        const settle=release===1&&!reduced?Math.sin((clock-3.2)*1.35)*.014*Math.exp(-(clock-3.2)*.22):0;
+        figure.puppet.position.y=THREE.MathUtils.lerp(.62,.10,release)+settle;
+        figure.puppet.rotation.z=reduced?-.025:Math.sin(clock*.43)*.025*Math.max(.35,1-release*.45);
+        scene.updateMatrixWorld(true);
+        ['index-finger-tip','middle-finger-tip','ring-finger-tip'].forEach((name,i)=>{
+          robot.bones[name].getWorldPosition(handPoint);figure.anchors[i].getWorldPosition(anchorPoint);
+          const positions=strings[i].geometry.attributes.position;
+          for(let j=0;j<24;j++){
+            const u=j/23;
+            positions.setXYZ(j,
+              THREE.MathUtils.lerp(handPoint.x,anchorPoint.x,u),
+              THREE.MathUtils.lerp(handPoint.y,anchorPoint.y,u)-Math.sin(Math.PI*u)*.025,
+              THREE.MathUtils.lerp(handPoint.z,anchorPoint.z,u)+Math.sin(Math.PI*u)*.012);
+          }
+          positions.needsUpdate=true;
+        });
       }
       renderer.render(scene,camera);
     }
@@ -335,5 +394,5 @@ export default function HandPuppet({active=true,paused=false}) {
       disposeTree(scene);env.dispose();renderer.dispose();renderer.domElement.remove();
     };
   },[]);
-  return <div ref={host} className="puppet-art" role="img" aria-label="A relaxed robotic hand releases a softly lit sphere, which hovers above an open human palm.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;
+  return <div ref={host} className="puppet-art" role="img" aria-label="A sculptural marionette hangs from fine strings beneath a relaxed robotic hand, above an open human palm.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;
 }
