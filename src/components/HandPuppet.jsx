@@ -34,13 +34,13 @@ function marionette(material,dark) {
   const head=new THREE.Mesh(new THREE.SphereGeometry(.22,36,24),material);head.position.y=.59;puppet.add(head);
   const torso=new THREE.Mesh(new RoundedBoxGeometry(.43,.52,.19,5,.06),material);torso.position.y=.17;puppet.add(torso);
   const pelvis=new THREE.Mesh(new RoundedBoxGeometry(.34,.15,.18,4,.05),dark);pelvis.position.y=-.19;puppet.add(pelvis);
-  limb(-.31,.18,.36,.06,-.52);limb(.31,.18,.36,.06,.52);
+  const upperL=limb(-.31,.18,.36,.06,-.52),upperR=limb(.31,.18,.36,.06,.52);
   joint(-.40,.03);joint(.40,.03);
-  limb(-.48,-.10,.31,.052,-.30);limb(.48,-.10,.31,.052,.30);
-  joint(-.53,-.25,0,.065);joint(.53,-.25,0,.065);
-  limb(-.12,-.39,.38,.07,-.10);limb(.12,-.39,.38,.07,.10);
+  const foreL=limb(-.48,-.10,.31,.052,-.30),foreR=limb(.48,-.10,.31,.052,.30);
+  const handL=joint(-.53,-.25,0,.065),handR=joint(.53,-.25,0,.065);
+  const thighL=limb(-.12,-.39,.38,.07,-.10),thighR=limb(.12,-.39,.38,.07,.10);
   joint(-.14,-.58);joint(.14,-.58);
-  limb(-.16,-.76,.35,.058,.06);limb(.16,-.76,.35,.058,-.06);
+  const shinL=limb(-.16,-.76,.35,.058,.06),shinR=limb(.16,-.76,.35,.058,-.06);
   const leftFoot=new THREE.Mesh(new RoundedBoxGeometry(.20,.08,.24,3,.03),dark);leftFoot.position.set(-.18,-.96,.05);puppet.add(leftFoot);
   const rightFoot=leftFoot.clone();rightFoot.position.x=.18;puppet.add(rightFoot);
   [-.075,.075].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(.018,14,10),dark);eye.position.set(x,.62,.205);puppet.add(eye);});
@@ -49,7 +49,29 @@ function marionette(material,dark) {
   anchors[0].position.set(-.53,-.20,0);anchors[1].position.set(0,.81,0);anchors[2].position.set(.53,-.20,0);
   anchors.forEach(anchor=>puppet.add(anchor));
   puppet.scale.setScalar(.78);
-  return {puppet,anchors};
+  const parts=[upperL,upperR,foreL,foreR,handL,handR,thighL,thighR,shinL,shinR,leftFoot,rightFoot,anchors[0],anchors[2]]
+    .map(o=>{o.x=o.position.x;o.y=o.position.y;o.rz=o.rotation.z;return o;});
+  const [uL,uR,fL,fR,hL,hR,tL,tR,sL,sR,lF,rF,aL,aR]=parts;
+  // Limbs dangle and swing from the strings; hand anchors follow the wrists
+  // so the two outer strings stay attached to the moving hands.
+  // The robot hand drives everything: the puppet trails the hand's motion
+  // like a pendulum, and each arm swings when its finger pulls.
+  function animate(t,hand){
+    const swing=Math.sin(t*.0021+1.2);
+    const lag=Math.sin(t*.0011-.9);
+    puppet.position.x=hand.x*.9;
+    puppet.position.y=-.25+hand.y*.9;
+    puppet.rotation.z=lag*.1;puppet.rotation.y=lag*.5;
+    uL.rotation.z=uL.rz+swing*.3;uR.rotation.z=uR.rz+Math.sin(t*.0021+3.1)*.3;
+    fL.rotation.z=fL.rz+swing*.5;fR.rotation.z=fR.rz+Math.sin(t*.0021+3.1)*.5;
+    const dl=swing*.045,dr=Math.sin(t*.0021+3.1)*.045;
+    hL.position.set(hL.x-dl*.8,hL.y+Math.abs(dl)*.4,0);hR.position.set(hR.x-dr*.8,hR.y+Math.abs(dr)*.4,0);
+    aL.position.set(aL.x-dl*.8,aL.y+Math.abs(dl)*.4,0);aR.position.set(aR.x-dr*.8,aR.y+Math.abs(dr)*.4,0);
+    tL.rotation.z=tL.rz+Math.sin(t*.0019)*.2;tR.rotation.z=tR.rz-Math.sin(t*.0019+.9)*.2;
+    sL.rotation.z=sL.rz+Math.sin(t*.0019+.5)*.28;sR.rotation.z=sR.rz-Math.sin(t*.0019+1.4)*.28;
+    lF.position.x=lF.x+Math.sin(t*.0019+.5)*.07;rF.position.x=rF.x-Math.sin(t*.0019+1.4)*.07;
+  }
+  return {puppet,anchors,animate};
 }
 
 function continuousForearm(model,origin,material) {
@@ -78,8 +100,8 @@ function continuousForearm(model,origin,material) {
   const values=[],faces=[],n=ring.length;
   [0,1,2,3,4].forEach(layer=>{
     ring.forEach(p=>{
-      const flare=[1,1.01,1.11,1.3,1.55][layer];
-      const x=layer===0?p.x:layer===1?p.x-.16:[0,0,-1.5,-3.5,-6.5][layer];
+      const flare=[1,1.01,1.06,1.14,1.22][layer];
+      const x=layer===0?p.x:layer===1?p.x-.16:[0,0,-.7,-1.5,-2.4][layer];
       values.push(x,center.y+(p.y-center.y)*flare,center.z+(p.z-center.z)*flare);
     });
   });
@@ -148,15 +170,17 @@ function setupRig(gltf, mechanical) {
   }
 
   // A sculpted continuous forearm extends beyond the source model's wrist.
-  const armGeometry = new THREE.CylinderGeometry(.29,.47,6,48,1,false);
+  const armGeometry = new THREE.CylinderGeometry(.29,.40,2.4,48,1,false);
   const smoothArm=!mechanical?continuousForearm(model,origin,ivory):null;
   const arm=smoothArm||new THREE.Mesh(armGeometry,mechanical?pale:ivory);
-  if(!smoothArm){arm.rotation.z=-Math.PI/2;arm.scale.z=.76;arm.position.set(-2.98,0,-.015);}
+  if(!smoothArm){arm.rotation.z=-Math.PI/2;arm.scale.z=.76;arm.position.set(-1.38,0,-.015);}
   else armGeometry.dispose();
   mount.add(arm);
   if(mechanical){
     const cuff=new THREE.Mesh(new THREE.CylinderGeometry(.335,.345,.19,48),titanium);
     cuff.rotation.z=Math.PI/2;cuff.scale.z=.78;cuff.position.x=-.14;mount.add(cuff);
+    const collar=new THREE.Mesh(new THREE.CylinderGeometry(.43,.43,.09,48),titanium);
+    collar.rotation.z=Math.PI/2;collar.scale.z=.76;collar.position.x=-2.55;mount.add(collar);
     const seam=new THREE.Mesh(new THREE.CylinderGeometry(.349,.349,.035,48),black);
     seam.rotation.z=Math.PI/2;seam.scale.z=.78;seam.position.x=-.25;mount.add(seam);
   }
@@ -231,7 +255,7 @@ function setupRig(gltf, mechanical) {
     const pp=discPosition.clone();pp.x+=.003;attachWorld(pin,wrist,pp,new THREE.Quaternion().setFromUnitVectors(V(0,1,0),V(1,0,0)));
   }
 
-  function pose(t,reduced,release=1){
+  function pose(t,reduced,release=1,flex=null){
     for(const {bone,original,axis} of motion){
       let angle=0;
       const name=bone.name;
@@ -244,6 +268,12 @@ function setupRig(gltf, mechanical) {
         if(name.includes('intermediate')) angle=.16+fi*.035;
         if(name.includes('distal')) angle=.10+fi*.025;
         if(name.includes('metacarpal')) angle=fi===0?-.12:0;
+        if(flex&&flex[fi]){
+          // Fingers pull the strings: curl each joint a little further.
+          if(name.includes('proximal')) angle+=flex[fi]*.8;
+          if(name.includes('intermediate')) angle+=flex[fi];
+          if(name.includes('distal')) angle+=flex[fi]*.6;
+        }
         const held=(1-release)*(fi===0?.10:.16);
         if(name.includes('proximal')) angle+=held;
         if(name.includes('intermediate')) angle+=held*.72;
@@ -254,7 +284,11 @@ function setupRig(gltf, mechanical) {
         if(name.includes('intermediate')) angle=[.18,.15,.19,.27][fi-1]||0;
         if(name.includes('distal')) angle=fi===0?.12:[.10,.09,.12,.17][fi-1];
         if(name.includes('metacarpal')) angle=fi===0?-.05:0;
-        if(!reduced && name.includes('proximal')) angle+=Math.sin(t*.32+fi*.18)*.003;
+        if(flex&&flex[fi]){
+          if(name.includes('proximal')) angle+=flex[fi]*.8;
+          if(name.includes('intermediate')) angle+=flex[fi];
+          if(name.includes('distal')) angle+=flex[fi]*.6;
+        }
       }
       // The source rig's local bend axis points away from the visible palm.
       // Negating the authored flex angles curls both hands inward naturally.
@@ -297,7 +331,7 @@ export default function HandPuppet() {
       renderer.outputColorSpace=THREE.SRGBColorSpace;
       renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.87;
       renderer.domElement.setAttribute('aria-hidden','true');
-      renderer.domElement.style.cssText='display:block;width:100%;height:100%;outline:0';
+      renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;outline:0;opacity:0';
       node.appendChild(renderer.domElement);
     }catch{setFallback(true);return;}
     const pmrem=new THREE.PMREMGenerator(renderer);
@@ -307,30 +341,66 @@ export default function HandPuppet() {
     const key=new THREE.DirectionalLight('#fff8e8',2.2);key.position.set(-3,5,6);scene.add(key);
     const rim=new THREE.DirectionalLight('#b4d4eb',3.1);rim.position.set(4,1,-3);scene.add(rim);
     const fill=new THREE.DirectionalLight('#b4c7db',.8);fill.position.set(-5,-2,3);scene.add(fill);
-    const puppetMaterial=new THREE.MeshPhysicalMaterial({color:'#e6e3d8',roughness:.54,metalness:.04,clearcoat:.12,clearcoatRoughness:.5,emissive:'#b5bbbd',emissiveIntensity:.045});
-    const puppetDark=ceramic('#68757c',.42,.32);
+    const puppetMaterial=new THREE.MeshPhysicalMaterial({color:'#6aa8ee',roughness:.54,metalness:.04,clearcoat:.12,clearcoatRoughness:.5,emissive:'#2f6bb5',emissiveIntensity:.25});
+    const puppetDark=ceramic('#3b78c4',.42,.32);
     const figure=marionette(puppetMaterial,puppetDark);scene.add(figure.puppet);
     const bounce=new THREE.PointLight('#ebeff3',1.1,6,2);bounce.position.set(0,0,1.2);scene.add(bounce);
     const strings=[];
-    for(let i=0;i<6;i++){
+    for(let i=0;i<3;i++){
       const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(24*3),3));
       const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:'#dbe3e6',transparent:true,opacity:.84,depthWrite:false,depthTest:false}));
       line.renderOrder=3;
       line.frustumCulled=false;scene.add(line);strings.push(line);
     }
+    // ASCII post-process: the WebGL frame is sampled per character cell and
+    // redrawn as monochrome glyphs on a 2D overlay.
+    const ascii=document.createElement('canvas');
+    ascii.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block';
+    ascii.setAttribute('aria-hidden','true');node.appendChild(ascii);
+    const actx=ascii.getContext('2d'),probe=document.createElement('canvas'),pctx=probe.getContext('2d',{willReadFrequently:true});
+    const PUPPET=' .:oO0Q@',RAMP=' .,:;-~=+*?#%@',BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5],SUB=3;
+    function asciify(){
+      const w=node.clientWidth,h=node.clientHeight;if(!w||!h)return;
+      const dpr=Math.min(window.devicePixelRatio||1,2);
+      const cw=w<620?6:7.5,ch=cw*1.7,cols=Math.ceil(w/cw),rows=Math.ceil(h/ch);
+      if(ascii.width!==Math.round(w*dpr)||ascii.height!==Math.round(h*dpr)){ascii.width=Math.round(w*dpr);ascii.height=Math.round(h*dpr);}
+      probe.width=cols*SUB;probe.height=rows*SUB;
+      pctx.clearRect(0,0,probe.width,probe.height);
+      pctx.drawImage(renderer.domElement,0,0,probe.width,probe.height);
+      const data=pctx.getImageData(0,0,probe.width,probe.height).data,stride=probe.width*4;
+      actx.setTransform(dpr,0,0,dpr,0,0);actx.clearRect(0,0,w,h);
+      actx.font=`${Math.round(ch*.95)}px ui-monospace,Menlo,monospace`;actx.textBaseline='top';
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+        let sum=0,max=0,cr=0,cb=0,cw2=0;
+        for(let sy=0;sy<SUB;sy++)for(let sx=0;sx<SUB;sx++){
+          const i=(r*SUB+sy)*stride+(c*SUB+sx)*4;
+          const v=(data[i]*.3+data[i+1]*.59+data[i+2]*.11)*data[i+3]/65025;
+          sum+=v;if(v>max)max=v;cr+=data[i]*v;cb+=data[i+2]*v;cw2+=v;
+        }
+        let v=Math.max(sum/(SUB*SUB),max*.55);
+        if(v<.04)continue;
+        v=Math.min(1,Math.pow(v,.75)*1.15+(BAYER[(r%4)*4+c%4]/16-.5)*.12);
+        // Blue-tinted pixels are the marionette: it gets its own glyph set and the theme's accent blue ink.
+        const puppet=cw2>0&&(cb-cr)/cw2>55;
+        const set=puppet?PUPPET:RAMP,k=Math.floor(v*(set.length-1));if(k<=0)continue;
+        const a=.45+.55*v;
+        actx.fillStyle=puppet?`rgba(138,190,244,${Math.min(1,a+.1).toFixed(2)})`:`rgba(226,234,238,${a.toFixed(2)})`;
+        actx.fillText(set[k],c*cw,r*ch);
+      }
+    }
     function resize(){
       dirty=true;
       const {width,height}=node.getBoundingClientRect();if(!width||!height)return;
       renderer.setSize(width,height,false);camera.aspect=width/height;
-      const visibleHeight=width<620?6.0:4.35;
+      const visibleHeight=width<620?7.4:5.5;
       camera.position.z=visibleHeight/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)));
       camera.updateProjectionMatrix();
       if(human&&robot){
         const compact=width<620;
-        human.mount.position.set(compact?-2.22:-2.82,compact?-1.95:-1.80,.04);
-        robot.mount.position.set(compact?1.88:2.30,compact?1.50:1.54,-.08);
+        human.mount.position.set(compact?-1.85:-2.35,compact?-2.30:-2.20,.04);humanBase.copy(human.mount.position);
+        robot.mount.position.set(compact?1.70:2.15,compact?1.40:1.35,-.08);robotBase.copy(robot.mount.position);
       }
-      renderer.render(scene,camera);
+      renderer.render(scene,camera);asciify();
     }
     const observer=new ResizeObserver(resize);observer.observe(node);resize();
     const loader=new GLTFLoader();
@@ -343,10 +413,9 @@ export default function HandPuppet() {
       human.pose(0,true);robot.pose(0,true);
       scene.updateMatrixWorld(true);
       loaded=true;dirty=true;resize();
-    }).catch(()=>{if(!disposed){renderer.domElement.style.visibility='hidden';setFallback(true);}});
+    }).catch(()=>{if(!disposed){renderer.domElement.style.visibility='hidden';ascii.style.visibility='hidden';setFallback(true);}});
 
-    const handPoint=V(),anchorPoint=V();
-    const supportPoints=[V(-.42,1.32,.14),V(0,1.46,.14),V(.42,1.32,.14)];
+    const handPoint=V(),anchorPoint=V(),robotBase=V(2.15,1.35,-.08),humanBase=V(-2.35,-2.20,.04);
     function setString(line,start,end){
       const positions=line.geometry.attributes.position;
       for(let j=0;j<24;j++){
@@ -362,35 +431,38 @@ export default function HandPuppet() {
       if(disposed)return;
       frame=requestAnimationFrame(render);
       if(now-last<1000/30)return;
-      if(loaded&&!dirty)return;
+      if(!loaded&&!dirty)return;
       last=now;
       dirty=false;
       if(loaded){
         const release=1;
-        human.pose(0,true,1);robot.pose(0,true,release);
-        human.mount.rotation.z=.13;
+        human.pose(0,true,1,[0,1,2,3,4].map(i=>Math.sin(now*.0009+i*.7)*.04));
+        robot.pose(0,true,release,[Math.sin(now*.0016+.4)*.22,.1+Math.sin(now*.0021+1.2)*.42,.1+Math.sin(now*.0017)*.42,.1+Math.sin(now*.0021+3.1)*.42,Math.sin(now*.0019+2.2)*.3]);
+        human.mount.rotation.z=.13+Math.sin(now*.0008)*.012;
+        human.mount.position.y=humanBase.y+Math.sin(now*.0010)*.02;
         robot.mount.rotation.z=Math.PI+.14;
         robot.mount.rotation.y=-.10;
         // Everything is motionless in equilibrium: the puppet's weight is
         // carried by the taut strings and never transfers to the human hand.
-        figure.puppet.position.y=.05;
-        figure.puppet.rotation.z=0;
+        const hx=Math.sin(now*.0011)*.16,hy=Math.sin(now*.0017)*.07;
+        robot.mount.position.set(robotBase.x+hx,robotBase.y+hy,robotBase.z);
+        robot.mount.rotation.x=-.48+Math.sin(now*.0011)*.05;
+        figure.animate(now,{x:Math.sin(now*.0011-.5)*.16,y:Math.sin(now*.0017-.5)*.07});
         scene.updateMatrixWorld(true);
         ['index-finger-tip','middle-finger-tip','ring-finger-tip'].forEach((name,i)=>{
           robot.bones[name].getWorldPosition(handPoint);figure.anchors[i].getWorldPosition(anchorPoint);
-          setString(strings[i],handPoint,supportPoints[i]);
-          setString(strings[i+3],supportPoints[i],anchorPoint);
+          setString(strings[i],handPoint,anchorPoint);
         });
       }
-      renderer.render(scene,camera);
+      renderer.render(scene,camera);asciify();
     }
     frame=requestAnimationFrame(render);
-    function contextLost(event){event.preventDefault();renderer.domElement.style.visibility='hidden';setFallback(true);}
+    function contextLost(event){event.preventDefault();renderer.domElement.style.visibility='hidden';ascii.style.visibility='hidden';setFallback(true);}
     renderer.domElement.addEventListener('webglcontextlost',contextLost);
     return()=>{
       disposed=true;cancelAnimationFrame(frame);observer.disconnect();
       renderer.domElement.removeEventListener('webglcontextlost',contextLost);
-      disposeTree(scene);env.dispose();renderer.dispose();renderer.domElement.remove();
+      disposeTree(scene);env.dispose();renderer.dispose();renderer.domElement.remove();ascii.remove();
     };
   },[]);
   return <div ref={host} className="puppet-art" role="img" aria-label="A sculptural marionette hangs from three taut strings beneath a relaxed robotic hand, safely above an open human palm.">{fallback&&<div style={{position:'absolute',inset:0}}>{fallbackMarkup()}</div>}</div>;

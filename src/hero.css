@@ -34,3 +34,80 @@
 @media(max-width:800px){.puppet-hero .agent-caption{left:auto;right:7%;top:43%}.puppet-hero .human-caption{left:7%;top:70%}}
 @media(max-width:560px){.puppet-hero .mechanism-label{display:none}}
 @media print{.puppet-art{inset:34% 0 12%}.puppet-hero .hero-persona{bottom:25px}.mechanism-label{display:none}}
+/* Keep the mechanism captions clear of the ASCII arms. */
+.puppet-hero .agent-caption{left:auto;right:6vw;top:58%;text-align:right;align-items:flex-end}
+.puppet-hero .human-caption{left:6vw;top:48%}
+@media(max-width:800px){.puppet-hero .agent-caption{right:5%;top:60%}.puppet-hero .human-caption{left:5%;top:52%}}
+/* Presentation legibility: larger type so slides read from a distance. */
+@media(min-width:801px){
+.label,.kicker{font-size:14px!important}
+.tiny,.footer-scroll,.footer-tools,.mechanism-label,.hand-label{font-size:12px!important}
+.mechanism-label>small{font-size:11px!important}
+.header-caption{font-size:12px!important}
+.footer-location>.mono,.footer-location>span:last-child{font-size:14px!important}
+.footer-location i{font-size:12px!important}
+.heading-aside{font-size:18px!important;max-width:400px!important}
+.body-copy,.cost-layout .body-copy,.solution-layout .body-copy,.learning-layout .body-copy{font-size:20px!important;max-width:560px!important}
+.hero-subtitle{font-size:20px!important}
+.puppet-hero .hero-persona p{font-size:17px!important}
+.puppet-hero .hero-persona .label{font-size:12px!important}
+.small-print,.cost-visual .small-print{font-size:14px!important}
+.scene-disclaimer{font-size:12px!important}
+.evidence-item h3{font-size:23px!important}
+.evidence-item p{font-size:17px!important;max-width:380px!important}
+.source-link{font-size:12px!important}
+.formula span{font-size:15px!important}
+.cost-question{font-size:23px!important}
+.mini-heading{font-size:13px!important}
+.cost-totals>div>span{font-size:15px!important}
+.model-assumption{font-size:16px!important}
+.value-lines p{font-size:19px!important}
+.value-lines span{font-size:13px!important}
+.orbit-label{font-size:12px!important}
+.orbit-caption{font-size:13px!important}
+.product-status{font-size:12px!important}
+.concept-line p{font-size:21px!important}
+.concept-line small{font-size:15px!important}
+.concept-line>span{font-size:13px!important}
+.brief-row{font-size:17px!important}
+.brief-row>span{font-size:15px!important}
+.brief-insight{font-size:23px!important}
+.comparison-row>strong{font-size:21px!important}
+.comparison-row>p{font-size:18px!important}
+.comparison-header{font-size:13px!important}
+.pilot-measures strong{font-size:20px!important}
+.pilot-measures>div>span{font-size:14px!important}
+.pilot-measures>.label{font-size:12px!important;max-width:150px!important}
+.closing-copy p{font-size:21px!important}
+.closing-copy>.label{font-size:13px!important}
+.closing-thought{font-size:12px!important}
+.speaker-notes>p{font-size:17px!important}
+.notes-label{font-size:12px!important}
+.source-articles p{font-size:15px!important}
+.source-articles a{font-size:13px!important}
+}
+/* Question slide artwork: the butterfly is re-inked in the theme blue on a transparent background. */
+.question-art{position:absolute;right:-5vw;top:50%;transform:translateY(-47%);height:82vh;width:auto;max-width:56vw;object-fit:contain;opacity:.85;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24%,#000 100%),linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(90deg,transparent 0,#000 24%,#000 100%),linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%);mask-composite:intersect;
+  filter:drop-shadow(0 0 28px #5aa8ee3a);animation:wing-breathe 7s ease-in-out infinite alternate}
+.question-scene .closing-copy{max-width:52vw}
+.question-scene .closing-copy .hero-title{font-size:clamp(46px,5.4vw,88px);max-width:none}
+@keyframes wing-breathe{from{opacity:.7}to{opacity:.95}}
+@media(max-width:800px){.question-art{height:36vh;max-width:90vw;right:-12vw;top:auto;bottom:80px;transform:none;opacity:.4;animation:none}.question-scene .closing-copy{max-width:100%}}
+/* Slide 2: halftone flowers frame both side borders and fade toward the content. */
+.bottleneck-scene{overflow:hidden}
+.border-art{position:absolute;top:50%;height:86vh;width:auto;max-width:30vw;opacity:.34;z-index:-1;pointer-events:none;filter:drop-shadow(0 0 22px #5aa8ee33)}
+.border-art-right{right:-4vw;transform:translateY(-50%);-webkit-mask-image:linear-gradient(270deg,#000 40%,transparent 100%);mask-image:linear-gradient(270deg,#000 40%,transparent 100%)}
+.border-art-left{left:-5vw;transform:translateY(-50%) scaleX(-1) rotate(180deg);height:70vh;opacity:.26;-webkit-mask-image:linear-gradient(270deg,#000 40%,transparent 100%);mask-image:linear-gradient(270deg,#000 40%,transparent 100%)}
+@media(max-width:800px){.border-art{opacity:.14}.border-art-left{display:none}}
+/* Slide 4: dragonflies perch on the side borders, half off-screen. */
+.evidence-scene{overflow:hidden}
+.dragon-art{height:auto;width:34vw;max-width:34vw;max-height:none;opacity:.3;filter:drop-shadow(0 0 24px #5aa8ee33)}
+.dragon-right{right:-13vw;top:22%;transform:rotate(14deg);-webkit-mask-image:none;mask-image:none}
+.dragon-left{left:-14vw;top:auto;bottom:-6%;transform:scaleX(-1) rotate(12deg);opacity:.22;width:30vw;max-width:30vw;-webkit-mask-image:none;mask-image:none}
+@media(max-width:800px){.dragon-art{opacity:.12}.dragon-left{display:none}}
+/* Slide 4 dragonflies: larger, vertically centered on each border. */
+.dragon-art{width:46vw;max-width:46vw;opacity:.34}
+.dragon-right{right:-20vw;top:50%;transform:translateY(-50%) rotate(12deg)}
+.dragon-left{left:-21vw;top:50%;bottom:auto;transform:translateY(-50%) scaleX(-1) rotate(12deg);width:42vw;max-width:42vw;opacity:.28}
