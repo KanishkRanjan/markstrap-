@@ -271,7 +271,7 @@ function fallbackMarkup(){
     <linearGradient id="puppet-limb" x2="1" y2="1"><stop stopColor="#4b5358"/><stop offset=".6" stopColor="#c8cbc6"/><stop offset="1" stopColor="#ede9dd"/></linearGradient></defs>
     <path d="M0 441L246 326Q330 288 392 301L518 278Q541 276 546 287Q549 300 528 308L433 334L488 329Q511 332 505 348L442 376Q386 407 309 404L0 488Z" fill="url(#puppet-limb)"/>
     <path d="M1200 44L922 127Q846 148 806 178L713 205Q694 211 698 224Q702 237 723 231L810 209L752 249Q737 260 747 272Q758 282 778 269L844 237L815 275Q806 289 820 297Q835 303 848 288L895 241Q929 214 950 185L1200 106Z" fill="url(#puppet-limb)"/>
-    <g fill="none" stroke="#aebfca" strokeWidth="1" opacity=".55"><path d="M770 196L577 310"/><path d="M730 205L610 245"/><path d="M700 220L644 310"/></g>
+    <g fill="none" stroke="#aebfca" strokeWidth="1" opacity=".65"><path d="M770 196L580 220L552 356"/><path d="M735 207L610 210L610 258"/><path d="M705 220L640 220L668 356"/></g>
     <g transform="translate(610 320)" fill="url(#puppet-orb)" stroke="#68757c" strokeWidth="2">
       <circle cy="-62" r="23"/><rect x="-23" y="-34" width="46" height="55" rx="10"/>
       <path d="M-20-20L-48 8L-58 36M20-20L48 8L58 36M-12 22L-17 66L-20 105M12 22L17 66L20 105" strokeWidth="12" strokeLinecap="round"/>
@@ -312,7 +312,7 @@ export default function HandPuppet() {
     const figure=marionette(puppetMaterial,puppetDark);scene.add(figure.puppet);
     const bounce=new THREE.PointLight('#ebeff3',1.1,6,2);bounce.position.set(0,0,1.2);scene.add(bounce);
     const strings=[];
-    for(let i=0;i<3;i++){
+    for(let i=0;i<6;i++){
       const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(24*3),3));
       const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:'#dbe3e6',transparent:true,opacity:.84,depthWrite:false,depthTest:false}));
       line.renderOrder=3;
@@ -327,8 +327,8 @@ export default function HandPuppet() {
       camera.updateProjectionMatrix();
       if(human&&robot){
         const compact=width<620;
-        human.mount.position.set(compact?-2.22:-2.82,compact?-1.78:-1.62,.04);
-        robot.mount.position.set(compact?2.30:2.96,compact?1.50:1.54,-.08);
+        human.mount.position.set(compact?-2.22:-2.82,compact?-1.95:-1.80,.04);
+        robot.mount.position.set(compact?1.88:2.30,compact?1.50:1.54,-.08);
       }
       renderer.render(scene,camera);
     }
@@ -346,6 +346,18 @@ export default function HandPuppet() {
     }).catch(()=>{if(!disposed){renderer.domElement.style.visibility='hidden';setFallback(true);}});
 
     const handPoint=V(),anchorPoint=V();
+    const supportPoints=[V(-.42,1.32,.14),V(0,1.46,.14),V(.42,1.32,.14)];
+    function setString(line,start,end){
+      const positions=line.geometry.attributes.position;
+      for(let j=0;j<24;j++){
+        const u=j/23;
+        positions.setXYZ(j,
+          THREE.MathUtils.lerp(start.x,end.x,u),
+          THREE.MathUtils.lerp(start.y,end.y,u),
+          THREE.MathUtils.lerp(start.z,end.z,u));
+      }
+      positions.needsUpdate=true;
+    }
     function render(now){
       if(disposed)return;
       frame=requestAnimationFrame(render);
@@ -361,20 +373,13 @@ export default function HandPuppet() {
         robot.mount.rotation.y=-.10;
         // Everything is motionless in equilibrium: the puppet's weight is
         // carried by the taut strings and never transfers to the human hand.
-        figure.puppet.position.y=.18;
+        figure.puppet.position.y=.05;
         figure.puppet.rotation.z=0;
         scene.updateMatrixWorld(true);
         ['index-finger-tip','middle-finger-tip','ring-finger-tip'].forEach((name,i)=>{
           robot.bones[name].getWorldPosition(handPoint);figure.anchors[i].getWorldPosition(anchorPoint);
-          const positions=strings[i].geometry.attributes.position;
-          for(let j=0;j<24;j++){
-            const u=j/23;
-            positions.setXYZ(j,
-              THREE.MathUtils.lerp(handPoint.x,anchorPoint.x,u),
-              THREE.MathUtils.lerp(handPoint.y,anchorPoint.y,u),
-              THREE.MathUtils.lerp(handPoint.z,anchorPoint.z,u));
-          }
-          positions.needsUpdate=true;
+          setString(strings[i],handPoint,supportPoints[i]);
+          setString(strings[i+3],supportPoints[i],anchorPoint);
         });
       }
       renderer.render(scene,camera);
