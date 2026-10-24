@@ -226,7 +226,9 @@ function setupRig(gltf, mechanical) {
         if(name.includes('metacarpal')) angle=fi===0?-.05:0;
         if(!reduced && name.includes('proximal')) angle+=Math.sin(t*.32+fi*.18)*.003;
       }
-      bone.quaternion.copy(original).multiply(new THREE.Quaternion().setFromAxisAngle(axis,angle));
+      // The source rig's local bend axis points away from the visible palm.
+      // Negating the authored flex angles curls both hands inward naturally.
+      bone.quaternion.copy(original).multiply(new THREE.Quaternion().setFromAxisAngle(axis,-angle));
     }
   }
   frame.add(model); model.position.sub(origin);
@@ -284,7 +286,7 @@ export default function HandPuppet({active=true,paused=false}) {
       camera.updateProjectionMatrix();
       if(human&&robot){
         const compact=width<620;
-        human.mount.position.set(compact?-2.22:-2.82,compact?-1.34:-1.30,.04);
+        human.mount.position.set(compact?-2.22:-2.82,compact?-1.62:-1.45,.04);
         robot.mount.position.set(compact?2.30:2.96,compact?1.22:1.24,-.08);
       }
       renderer.render(scene,camera);
@@ -320,7 +322,7 @@ export default function HandPuppet({active=true,paused=false}) {
         robot.mount.rotation.z=Math.PI+.14+(reduced?0:Math.sin(clock*.28-.2)*.006);
         robot.mount.rotation.y=-.10+(reduced?0:Math.sin(clock*.25)*.008);
         const settle=release===1&&!reduced?Math.sin((clock-3.2)*1.45)*.012*Math.exp(-(clock-3.2)*.24):0;
-        orb.position.y=THREE.MathUtils.lerp(.58,-.02,release)+settle;
+        orb.position.y=THREE.MathUtils.lerp(.58,.08,release)+settle;
       }
       renderer.render(scene,camera);
     }
