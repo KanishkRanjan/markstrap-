@@ -1,0 +1,36 @@
+/* Opening plate: sculptural hands, restrained editorial type, presentation-first. */
+.puppet-hero .scene-inner{background:#080a0e;isolation:isolate}
+.puppet-hero .scene-inner:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 54% 65%,#14233230,transparent 50%);pointer-events:none;z-index:-1}
+.puppet-hero .hero-copy{top:15%;transform:translateX(-50%);width:90%;pointer-events:none}
+.puppet-hero .hero-copy .kicker{font-size:8px;letter-spacing:.18em;margin-bottom:19px;color:#8da7bc}
+.puppet-hero .hero-title{font-size:clamp(39px,3.5vw,64px);line-height:1.1;letter-spacing:-.055em;text-shadow:none}
+.puppet-hero .hero-title>.serif{color:#c8d0d7;font-size:1.02em;letter-spacing:-.045em}
+.puppet-hero .hero-subtitle{font-size:12px;line-height:1.85;color:#8e9ba7;margin-top:18px}
+.puppet-art{position:absolute;inset:34% 0 10%;z-index:0;pointer-events:none}
+.puppet-art>canvas{width:100%;height:100%;display:block;outline:none}
+.hero-frame{position:absolute;inset:105px 5vw 91px;pointer-events:none;z-index:1}
+.hero-frame>span{position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(transparent,#a0b4c512 25%,#a0b4c514 70%,transparent)}
+.hero-frame>span:first-child{left:0}.hero-frame>span:nth-child(2){right:0}
+.hero-frame>i{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a0b4c514 20%,#a0b4c514 80%,transparent)}
+.hero-frame>i:nth-child(3){top:28%}.hero-frame>i:nth-child(4){bottom:0}
+.puppet-hero .hero-persona{left:auto;right:7vw;bottom:101px;width:235px;padding:12px 0 12px 15px;background:linear-gradient(90deg,transparent,#080a0ee8 25%);text-align:right}
+.puppet-hero .hero-persona .label{font-size:7px;letter-spacing:.12em;color:#7994ac}
+.puppet-hero .hero-persona p{font-size:11px;line-height:1.8;margin:8px 0 0;color:#94a8ba}
+.mechanism-label{position:absolute;font-size:7px;letter-spacing:.12em;z-index:2;pointer-events:none;color:#aebecb;display:flex;flex-direction:column;gap:8px}
+.mechanism-label>small{font-size:6px;color:#5e7b94;letter-spacing:.09em}
+.mechanism-label>i{height:1px;width:58px;background:#526c823e}
+.agent-caption{left:75%;top:40%}
+.human-caption{left:17%;top:66%}
+.puppet-loading{display:flex;align-items:center;justify-content:center}
+.puppet-loading>span{width:76px;height:76px;border-radius:50%;background:radial-gradient(circle at 36% 30%,#e0e1d7,#77828a 50%,#28323d 85%);box-shadow:0 0 80px #93c9ed10;opacity:.55}
+.footer-signature{font-size:7px;letter-spacing:.13em;color:#627d94}
+@media(min-width:1700px){.puppet-hero .hero-copy{top:15.5%}.puppet-hero .hero-title{font-size:66px}.puppet-hero .hero-subtitle{font-size:13px}.puppet-hero .hero-persona p{font-size:12px}}
+@media(max-height:800px) and (min-width:901px){.puppet-hero .hero-copy{top:13.5%}.puppet-hero .hero-copy .kicker{margin-bottom:14px;font-size:7px}.puppet-hero .hero-title{font-size:46px}.puppet-hero .hero-subtitle{font-size:10px;margin-top:13px}.puppet-art{inset:35% 0 9%}.hero-frame{inset:84px 5vw 77px}.puppet-hero .hero-persona{bottom:75px}.puppet-hero .hero-persona p{font-size:9px}.mechanism-label{font-size:6px;gap:6px}.mechanism-label>small{font-size:5px}}
+@media(max-width:1050px){.agent-caption{left:78%;top:47%}.human-caption{left:12%;top:77%}.puppet-hero .hero-persona{width:200px}.puppet-hero .hero-title{font-size:48px}.footer-signature{font-size:6px;letter-spacing:.05em}}
+@media(max-width:800px){.puppet-hero .hero-copy{top:14%;width:92%}.puppet-hero .hero-title{font-size:43px}.puppet-hero .hero-subtitle{font-size:11px;margin-top:17px}.puppet-art{inset:37% -8% 15%}.hero-frame{inset:84px 5vw 78px}.hero-frame>i:nth-child(3){top:29%}.puppet-hero .hero-persona{bottom:82px;right:7vw;width:190px}.puppet-hero .hero-persona p{font-size:10px}.puppet-hero .hero-persona .label{font-size:6px}.mechanism-label{font-size:6px;gap:6px}.mechanism-label>small{font-size:5px}.agent-caption{left:78%;top:47%}.human-caption{left:9%;top:72%}.footer-signature{display:none}}
+@media(max-width:560px){.puppet-hero .hero-copy{top:14%;width:91%}.puppet-hero .hero-copy .kicker{font-size:6px;letter-spacing:.12em;margin-bottom:16px}.puppet-hero .hero-title{font-size:36px;line-height:1.13}.puppet-hero .hero-title>.serif{font-size:1.02em}.puppet-hero .hero-subtitle{font-size:10px;line-height:1.9;max-width:290px;margin:16px auto 0}.puppet-hero .hero-subtitle br{display:none}.puppet-art{inset:40% -13% 18%}.hero-frame{inset:80px 5vw 78px}.hero-frame>i:nth-child(3){top:32%}.agent-caption{left:auto;right:7%;top:45%;font-size:5px}.human-caption{left:7%;top:75%;font-size:5px}.mechanism-label>small{font-size:4px}.mechanism-label>i{width:35px}.puppet-hero .hero-persona{bottom:80px;right:7vw;width:180px}.puppet-hero .hero-persona p{font-size:9px}.puppet-hero .hero-persona .label{font-size:5px}}
+.puppet-hero .agent-caption{left:77%;top:40%}
+.puppet-hero .human-caption{left:18%;top:66%}
+@media(max-width:800px){.puppet-hero .agent-caption{left:auto;right:7%;top:43%}.puppet-hero .human-caption{left:7%;top:70%}}
+@media(max-width:560px){.puppet-hero .mechanism-label{display:none}}
+@media print{.puppet-art{inset:34% 0 12%}.puppet-hero .hero-persona{bottom:25px}.mechanism-label{display:none}}
